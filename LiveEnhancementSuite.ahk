@@ -1531,12 +1531,16 @@ gosub, VSTredo
 Return
 
 quickmarker:
-WinGetActiveTitle, wintitleoutput
-if !(InStr(title, "Live 9", CaseSensitive := false) = 0){
-WinMenuSelectItem,,, 3&, 13&
+MouseGetPos,,,guideUnderCursor
+WinGetTitle, WinTitle, ahk_id %guideUnderCursor%
+if (InStr(WinTitle, "Live 9", CaseSensitive := false) != 0){
+	WinMenuSelectItem,,, 3&, 13&
 }
-Else{
-WinMenuSelectItem,,, 3&, 14&
+else if(InStr(WinTitle, "Ableton Live 11") != 0){
+	WinMenuSelectItem,,, 3&, 20&
+}
+else if(InStr(WinTitle, "Ableton") != 0){
+	WinMenuSelectItem,,, 3&, 14&
 }
 return
 
