@@ -1095,8 +1095,12 @@ Loop
 	
 	Array[mathvar] := configoutput ;putting the output in an array
 	
-	If (counter ~= "\.0+?$|^[^\.]$"){	; on titles only
+	; If the configoutput is not the title (ie it's the query)
+	If !(counter ~= "\.0+?$|^[^\.]$"){
 		actionname:= RegExReplace(configoutput, "^.*?,")
+
+		; Bind the related query to the OpenPluginHelper function. 
+		handler := Func("OpenPluginHelper").Bind(Array[mathvar])
 		
 		if (menuitemcount = "") ;counting how many items the config has output
 		{
@@ -1105,25 +1109,25 @@ Loop
 		menuitemcount := menuitemcount + 1
 		
 		If (NoCategoryHeader = 1){
-		Menu, ALmenu, Add, % Array[mathvar], % menuitemcount
+		Menu, ALmenu, Add, % Array[mathvar - 1], % handler
 		CategoryHeader := 0
 		}
 		If (CategoryHeader = 1){
-		Menu, % categoryname[depth], Add, % Array[mathvar], % menuitemcount
+		Menu, % categoryname[depth], Add, % Array[mathvar - 1], % handler
 		Menu, % categorydest[depth], Add, % categoryname[depth], % ":" . categoryname[depth]
 		}
 		Else{
-		Menu, ALmenu, Add, % Array[mathvar], % menuitemcount
+		Menu, ALmenu, Add, % Array[mathvar - 1], % handler
 		}
 	}
-	else{
-	if (querycount = "") ;counting in order to figure out if config output is a menu item name or a search query
-		{
-		querycount := 0
-		}
-		querycount := querycount + 1
-		queryname%querycount% := Array[mathvar]
-	}
+	; else{
+	; if (querycount = "") ;counting in order to figure out if config output is a menu item name or a search query
+	; 	{
+	; 	querycount := 0
+	; 	}
+	; 	querycount := querycount + 1
+	; 	queryname%querycount% := Array[mathvar]
+	; }
 
 	skipalles:
 	mathvar := mathvar + 1
@@ -1142,7 +1146,7 @@ goto klaar
 ; I printed out a 4000 line AHK script that's nothing but goto markers with two lines of repeated code each.
 ; None of this code is actually executed unless a menu item is clicked; so I moved it to a library to debloat my code.
 ; I would be greatful if you could figure out a better way to do this, but right now; I'm going to keep sinning. Sinning hard forever.
-#include menuindex.ahk
+;#include menuindex.ahk
 
 }
 klaar:
@@ -1151,6 +1155,14 @@ Return
 ;-----------------------------------;
 ;		  Opening a plugin		;
 ;-----------------------------------;
+; Need global declaration so openplugin subroutine can use it when we assign it a value in the OpenPluginHelper function.
+global queryname
+
+OpenPluginHelper(query)
+{
+	queryname := query
+	Gosub, openplugin
+}
 
 openplugin: ;you would think consistently typing something in the ableton search bar would be easy
 loop, 1{
